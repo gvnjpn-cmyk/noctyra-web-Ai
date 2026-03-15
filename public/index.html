@@ -1,1 +1,619 @@
-<--hallo-->
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Noctyra AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Outfit:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────── */
+    :root[data-theme="dark"] {
+      --bg:           #0d0d0f;
+      --surface:      #141416;
+      --surface2:     #1c1c20;
+      --border:       rgba(255,255,255,0.055);
+      --border-focus: rgba(201,169,110,0.35);
+      --text:         #e8e3d8;
+      --text-2:       #7a7570;
+      --text-3:       #3a3830;
+      --gold:         #c9a96e;
+      --gold-dim:     rgba(201,169,110,0.08);
+      --gold-glow:    rgba(201,169,110,0.18);
+      --blue:         #5b9bd6;
+      --user-bubble:  #1e1e24;
+      --code-bg:      #111113;
+      --scrollbar:    #2a2928;
+    }
+    :root[data-theme="light"] {
+      --bg:           #f5f2ec;
+      --surface:      #faf9f6;
+      --surface2:     #f0ede6;
+      --border:       rgba(0,0,0,0.07);
+      --border-focus: rgba(180,130,70,0.35);
+      --text:         #1c1916;
+      --text-2:       #8a847c;
+      --text-3:       #c8c4bc;
+      --gold:         #b87d3a;
+      --gold-dim:     rgba(184,125,58,0.07);
+      --gold-glow:    rgba(184,125,58,0.15);
+      --blue:         #3a7fbf;
+      --user-bubble:  #eeeae2;
+      --code-bg:      #e8e4dc;
+      --scrollbar:    #d4d0c8;
+    }
+
+    /* ── RESET ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
+      letter-spacing: 0.01em;
+    }
+
+    /* Grain texture */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none;
+      opacity: 0.022;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+    }
+
+    /* ── HEADER ─────────────────────────────────────────── */
+    header {
+      position: relative; z-index: 20;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      height: 58px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .logo { display: flex; align-items: center; gap: 11px; }
+
+    .logo-mark {
+      width: 30px; height: 30px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .logo-mark::after {
+      content: '';
+      position: absolute; inset: 3px;
+      border-radius: 4px;
+      background: var(--gold);
+      opacity: 0.12;
+    }
+    .logo-mark span { font-size: 13px; z-index: 1; }
+
+    .logo-wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: 20px;
+      letter-spacing: 0.05em;
+      color: var(--text);
+    }
+    .logo-wordmark em { font-style: normal; color: var(--gold); }
+
+    .logo-sep { width: 1px; height: 16px; background: var(--border); }
+
+    .logo-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      color: var(--text-2);
+      text-transform: uppercase;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+
+    .btn-ghost {
+      height: 32px; padding: 0 13px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-2);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px; font-weight: 300;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: all 0.2s;
+    }
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--border-focus);
+      background: var(--gold-dim);
+    }
+
+    .theme-pill {
+      height: 32px; padding: 0 5px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex; align-items: center; gap: 2px;
+      cursor: pointer;
+    }
+    .theme-opt {
+      width: 24px; height: 24px;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+    .theme-opt.active { background: var(--gold-dim); }
+
+    /* ── LAYOUT ─────────────────────────────────────────── */
+    .layout { position: relative; z-index: 1; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+    .messages {
+      flex: 1; overflow-y: auto;
+      padding: 32px 0 12px;
+      display: flex; flex-direction: column;
+      scroll-behavior: smooth;
+    }
+    .messages::-webkit-scrollbar { width: 3px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 2px; }
+
+    /* ── WELCOME ────────────────────────────────────────── */
+    .welcome {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 48px 24px;
+      animation: rise 0.7s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .welcome-sigil {
+      width: 64px; height: 64px;
+      border: 1px solid var(--gold);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px;
+      position: relative;
+      animation: breathe 4s ease-in-out infinite;
+    }
+    .welcome-sigil::before {
+      content: '';
+      position: absolute; inset: -1px;
+      border-radius: 17px;
+      background: var(--gold-glow);
+      filter: blur(14px);
+      opacity: 0.6;
+    }
+    .welcome-sigil span { font-size: 26px; z-index: 1; }
+    @keyframes breathe {
+      0%,100% { box-shadow: 0 0 0 0 transparent; }
+      50% { box-shadow: 0 0 28px 2px var(--gold-glow); }
+    }
+    .welcome h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px; font-weight: 400;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+    .welcome h1 span { color: var(--gold); }
+    .welcome-sub {
+      font-size: 14px; color: var(--text-2);
+      line-height: 1.75; max-width: 300px;
+      margin-bottom: 36px; font-weight: 300;
+    }
+    .chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; max-width: 480px;
+    }
+    .chip {
+      font-size: 12.5px; padding: 7px 15px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all 0.22s;
+      letter-spacing: 0.01em;
+      font-weight: 300;
+    }
+    .chip:hover {
+      color: var(--gold);
+      border-color: var(--border-focus);
+      background: var(--gold-dim);
+    }
+
+    /* ── ROWS ───────────────────────────────────────────── */
+    .row { padding: 5px 0; animation: rise 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .row-inner {
+      max-width: 720px; margin: 0 auto;
+      padding: 0 28px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .row.user .row-inner { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 28px; height: 28px; border-radius: 7px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; margin-top: 3px;
+    }
+    .row.ai .avatar { border: 1px solid var(--gold); background: var(--gold-dim); }
+    .row.user .avatar { border: 1px solid var(--border); background: var(--surface2); }
+
+    .bubble {
+      max-width: 78%;
+      padding: 12px 17px;
+      border-radius: 12px;
+      font-size: 14px; line-height: 1.75;
+      font-weight: 300;
+    }
+    .row.ai .bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 3px 12px 12px 12px;
+    }
+    .row.user .bubble {
+      background: var(--user-bubble);
+      border: 1px solid var(--border);
+      border-radius: 12px 3px 12px 12px;
+    }
+
+    /* Markdown */
+    .bubble p { margin-bottom: 8px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble ul, .bubble ol { padding-left: 18px; margin-bottom: 8px; }
+    .bubble li { margin-bottom: 4px; }
+    .bubble strong { font-weight: 500; color: var(--gold); }
+    .bubble em { font-style: italic; color: var(--text-2); }
+    .bubble a { color: var(--blue); text-decoration: none; border-bottom: 1px solid currentColor; }
+    .bubble code:not(pre code) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: var(--gold-dim);
+      color: var(--gold);
+      padding: 1px 6px; border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .bubble pre {
+      background: var(--code-bg) !important;
+      border: 1px solid var(--border);
+      border-radius: 8px; margin: 10px 0; overflow: hidden;
+    }
+    .bubble pre code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px !important;
+      padding: 14px 16px !important;
+      display: block; overflow-x: auto;
+      background: transparent !important;
+      color: var(--text) !important;
+    }
+    .bubble h1, .bubble h2, .bubble h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500; color: var(--text);
+      margin: 12px 0 6px;
+    }
+    .bubble h1 { font-size: 20px; }
+    .bubble h2 { font-size: 17px; }
+    .bubble h3 { font-size: 15px; }
+    .bubble blockquote {
+      border-left: 2px solid var(--gold);
+      padding-left: 14px; color: var(--text-2);
+      margin: 10px 0; font-style: italic;
+    }
+    .bubble hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+    .bubble table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+    .bubble th, .bubble td { padding: 7px 12px; border: 1px solid var(--border); text-align: left; }
+    .bubble th { color: var(--gold); font-weight: 500; background: var(--gold-dim); }
+
+    /* Thin divider between exchanges */
+    .divider {
+      max-width: 720px; margin: 6px auto;
+      padding: 0 28px;
+    }
+    .divider-line { height: 1px; background: var(--border); }
+
+    /* ── TYPING ─────────────────────────────────────────── */
+    .dots { display: flex; align-items: center; gap: 5px; padding: 3px 0; }
+    .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--gold); opacity: 0.3;
+      animation: blink 1.3s ease-in-out infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.18s; }
+    .dot:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes blink {
+      0%,80%,100% { opacity: 0.3; transform: scale(0.9); }
+      40% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* ── INPUT ──────────────────────────────────────────── */
+    .input-zone {
+      position: relative; z-index: 20;
+      padding: 14px 28px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .input-frame { max-width: 720px; margin: 0 auto; }
+
+    .input-box {
+      display: flex; align-items: flex-end; gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 10px 10px 16px;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .input-box:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--gold-dim);
+    }
+
+    textarea {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px; font-weight: 300;
+      resize: none; max-height: 160px; line-height: 1.6;
+      letter-spacing: 0.01em;
+    }
+    textarea::placeholder { color: var(--text-3); }
+    textarea::-webkit-scrollbar { width: 2px; }
+    textarea::-webkit-scrollbar-thumb { background: var(--scrollbar); }
+
+    .send {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--gold); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.2s;
+    }
+    .send:hover { opacity: 0.85; transform: translateY(-1px); box-shadow: 0 4px 16px var(--gold-glow); }
+    .send:active { transform: scale(0.95); }
+    .send:disabled { opacity: 0.25; cursor: not-allowed; transform: none; box-shadow: none; }
+    .send svg { width: 15px; height: 15px; }
+    [data-theme="dark"] .send svg { fill: #0d0d0f; }
+    [data-theme="light"] .send svg { fill: #faf9f6; }
+
+    .input-meta {
+      display: flex; justify-content: space-between;
+      margin-top: 9px; padding: 0 2px;
+    }
+    .meta-l {
+      font-size: 10.5px; color: var(--text-3);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.07em;
+    }
+    .meta-r { font-size: 11px; color: var(--text-3); letter-spacing: 0.02em; }
+
+    /* ── ERROR ──────────────────────────────────────────── */
+    .err-wrap { max-width: 720px; margin: 4px auto; padding: 0 28px; }
+    .err-bubble {
+      font-size: 13px; color: #c97070;
+      background: rgba(201,112,112,0.06);
+      border: 1px solid rgba(201,112,112,0.15);
+      border-radius: 8px; padding: 10px 14px;
+      animation: rise 0.3s ease both;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark"><span>🌙</span></div>
+    <span class="logo-wordmark">Noctyra<em> AI</em></span>
+    <div class="logo-sep"></div>
+    <span class="logo-tag">v1.0</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn-ghost" onclick="clearChat()">Bersihkan</button>
+    <div class="theme-pill" onclick="toggleTheme()">
+      <div class="theme-opt" id="opt-dark">🌙</div>
+      <div class="theme-opt" id="opt-light">☀️</div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="messages" id="messages">
+    <div class="welcome" id="welcome">
+      <div class="welcome-sigil"><span>🌙</span></div>
+      <h1>Noctyra <span>AI</span></h1>
+      <p class="welcome-sub">Asisten serba bisa yang siap membantu kapan saja. Tanyakan apa saja.</p>
+      <div class="chips">
+        <div class="chip" onclick="suggest('Siapa kamu?')">Siapa kamu?</div>
+        <div class="chip" onclick="suggest('Siapa yang membuat kamu?')">Siapa pembuatmu?</div>
+        <div class="chip" onclick="suggest('Bantu aku debug kode')">Bantu debug kode</div>
+        <div class="chip" onclick="suggest('Apa yang bisa kamu lakukan?')">Kemampuanmu</div>
+        <div class="chip" onclick="suggest('Ceritakan sesuatu yang menarik')">Cerita menarik</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="input-zone">
+  <div class="input-frame">
+    <div class="input-box">
+      <textarea id="input" rows="1" placeholder="Ketik pesan..."
+        onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+      <button class="send" id="send" onclick="sendMsg()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="input-meta">
+      <span class="meta-l">ENTER kirim · SHIFT+ENTER baris baru</span>
+      <span class="meta-r">gemini-2.0-flash</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let history = [], busy = false;
+  const $msg  = document.getElementById('messages');
+  const $inp  = document.getElementById('input');
+  const $send = document.getElementById('send');
+
+  // Theme
+  const saved = localStorage.getItem('noctyra-theme') || 'dark';
+  applyTheme(saved);
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('noctyra-theme', t);
+    document.getElementById('opt-dark').classList.toggle('active', t === 'dark');
+    document.getElementById('opt-light').classList.toggle('active', t === 'light');
+  }
+  function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+
+  // Marked
+  marked.setOptions({
+    highlight: (code, lang) => {
+      if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value;
+      return hljs.highlightAuto(code).value;
+    },
+    breaks: true, gfm: true
+  });
+
+  function resize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }
+  function scroll() { $msg.scrollTop = $msg.scrollHeight; }
+
+  function hideWelcome() {
+    const w = document.getElementById('welcome');
+    if (!w) return;
+    w.style.transition = 'opacity 0.25s, transform 0.25s';
+    w.style.opacity = '0'; w.style.transform = 'translateY(-6px)';
+    setTimeout(() => w.remove(), 250);
+  }
+
+  function addRow(role, content) {
+    hideWelcome();
+
+    if (role === 'user' && history.length > 1) {
+      const d = document.createElement('div');
+      d.className = 'divider';
+      d.innerHTML = '<div class="divider-line"></div>';
+      $msg.appendChild(d);
+    }
+
+    const row = document.createElement('div');
+    row.className = `row ${role}`;
+    const inner = document.createElement('div');
+    inner.className = 'row-inner';
+    const av = document.createElement('div');
+    av.className = 'avatar';
+    av.textContent = role === 'ai' ? '🌙' : '✦';
+    const bub = document.createElement('div');
+    bub.className = 'bubble';
+    if (role === 'ai') {
+      bub.innerHTML = marked.parse(content);
+      bub.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+    } else {
+      bub.textContent = content;
+    }
+    inner.appendChild(av);
+    inner.appendChild(bub);
+    row.appendChild(inner);
+    $msg.appendChild(row);
+    scroll();
+  }
+
+  function showTyping() {
+    hideWelcome();
+    const row = document.createElement('div');
+    row.className = 'row ai'; row.id = 'typing';
+    row.innerHTML = `<div class="row-inner">
+      <div class="avatar">🌙</div>
+      <div class="bubble" style="padding:14px 17px">
+        <div class="dots">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+      </div></div>`;
+    $msg.appendChild(row); scroll();
+  }
+  function removeTyping() { document.getElementById('typing')?.remove(); }
+
+  function showError(msg) {
+    removeTyping();
+    const w = document.createElement('div'); w.className = 'err-wrap';
+    w.innerHTML = `<div class="err-bubble">⚠ ${msg}</div>`;
+    $msg.appendChild(w); scroll();
+  }
+
+  async function sendMsg() {
+    const text = $inp.value.trim();
+    if (!text || busy) return;
+    busy = true; $send.disabled = true;
+    $inp.value = ''; $inp.style.height = 'auto';
+
+    addRow('user', text);
+    history.push({ role: 'user', content: text });
+    showTyping();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      });
+      const data = await res.json();
+      removeTyping();
+      if (!res.ok || data.error) {
+        showError(data.error || 'Terjadi kesalahan.');
+        history.pop();
+      } else {
+        addRow('ai', data.reply);
+        history.push({ role: 'assistant', content: data.reply });
+      }
+    } catch {
+      removeTyping();
+      showError('Tidak dapat terhubung ke server.');
+      history.pop();
+    }
+
+    busy = false; $send.disabled = false; $inp.focus();
+  }
+
+  function suggest(t) { $inp.value = t; sendMsg(); }
+  function onKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
+
+  function clearChat() {
+    history = []; $msg.innerHTML = '';
+    const w = document.createElement('div');
+    w.className = 'welcome'; w.id = 'welcome';
+    w.innerHTML = `
+      <div class="welcome-sigil"><span>🌙</span></div>
+      <h1>Noctyra <span>AI</span></h1>
+      <p class="welcome-sub">Asisten serba bisa yang siap membantu kapan saja. Tanyakan apa saja.</p>
+      <div class="chips">
+        <div class="chip" onclick="suggest('Siapa kamu?')">Siapa kamu?</div>
+        <div class="chip" onclick="suggest('Siapa yang membuat kamu?')">Siapa pembuatmu?</div>
+        <div class="chip" onclick="suggest('Bantu aku debug kode')">Bantu debug kode</div>
+        <div class="chip" onclick="suggest('Apa yang bisa kamu lakukan?')">Kemampuanmu</div>
+        <div class="chip" onclick="suggest('Ceritakan sesuatu yang menarik')">Cerita menarik</div>
+      </div>`;
+    $msg.appendChild(w);
+  }
+</script>
+</body>
+</html>
